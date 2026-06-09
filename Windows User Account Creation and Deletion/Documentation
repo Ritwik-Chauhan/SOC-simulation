@@ -1,0 +1,134 @@
+# Day 01 - Windows User Account Creation and Deletion Detection
+
+## Objective
+
+Validate that the Wazuh agent is successfully forwarding Windows security events to the Wazuh Manager and that administrative account-management activities can be observed from the SIEM dashboard.
+
+---
+
+## Lab Environment
+
+### Infrastructure
+
+* Wazuh Server (Ubuntu 22.04)
+* Windows 10 Endpoint
+* VirtualBox Host-Only Network
+
+### Components
+
+* Wazuh Manager
+* Wazuh Indexer
+* Wazuh Dashboard
+* Wazuh Windows Agent
+
+---
+
+## Activity Performed
+
+A local Windows user account was created and then deleted from PowerShell.
+
+### Commands Executed
+
+```powershell
+net user SOCLabUser Password123! /add
+net user SOCLabUser /delete
+```
+
+---
+
+## Expected Security Impact
+
+Creation of a local user account is commonly associated with:
+
+* Privilege escalation
+* Persistence mechanisms
+* Unauthorized account provisioning
+* Administrative system changes
+
+Deletion of an account may indicate:
+
+* Cleanup activity
+* Covering attacker tracks
+* Administrative account management
+
+---
+
+## Detection Process
+
+1. Executed the commands on the Windows endpoint.
+2. Waited for log forwarding through the Wazuh Agent.
+3. Opened the Wazuh Dashboard.
+4. Navigated to Security Events / Threat Hunting.
+5. Searched for recent Windows security events.
+
+---
+
+## Results
+
+### User Creation
+
+Observed a Windows event indicating local account creation.
+
+Account Name:
+
+```text
+SOCLabUser
+```
+
+### User Deletion
+
+Observed a Windows event indicating local account deletion.
+
+Account Name:
+
+```text
+SOCLabUser
+```
+
+The events were successfully ingested and searchable within the Wazuh dashboard.
+
+---
+
+## SOC Analyst Notes
+
+This exercise confirms:
+
+* Endpoint-to-SIEM communication is functioning.
+* Windows Security logs are being collected.
+* Administrative account-management activity is visible.
+* Wazuh can be used to investigate endpoint changes.
+
+---
+
+## MITRE ATT&CK Mapping
+
+### Account Manipulation
+
+Technique:
+
+T1098 - Account Manipulation
+
+Potential attacker objective:
+
+* Persistence
+* Privilege maintenance
+* Unauthorized access management
+
+---
+
+## Lessons Learned
+
+* Not every security-relevant action generates a high-severity alert.
+* Many events first appear as raw logs and require investigation.
+* Successful log collection is the foundation of SOC monitoring.
+* User-account events are useful indicators during incident investigations.
+
+---
+
+# Status
+
+Lab Test: Successful
+
+Detection Source: Windows Security Logs
+
+SIEM: Wazuh
