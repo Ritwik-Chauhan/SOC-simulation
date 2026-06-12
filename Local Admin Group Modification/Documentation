@@ -1,0 +1,232 @@
+# Day 04 - Local Administrator Group Modification Detection
+
+## Objective
+
+Simulate post-compromise account manipulation by creating a local user account and adding it to the Windows Administrators group. Verify that Wazuh successfully detects and records the activity.
+
+---
+
+## Lab Environment
+
+### Infrastructure
+
+* Windows 10 Pro Endpoint
+* Ubuntu 22.04 Wazuh Server
+* Kali Linux VM (Available for future attack simulations)
+* VirtualBox Host-Only Network
+
+### Components
+
+* Wazuh Manager
+* Wazuh Indexer
+* Wazuh Dashboard
+* Wazuh Windows Agent
+
+---
+
+## Scenario
+
+After obtaining administrative privileges on a compromised system, an attacker may create a new local account and grant it administrator permissions.
+
+This technique can be used to:
+
+* Maintain persistence
+* Create alternate access paths
+* Establish long-term administrative control
+* Evade detection by using seemingly legitimate accounts
+
+The purpose of this exercise was to simulate this behavior and validate Wazuh's ability to detect and log the activity.
+
+---
+
+## MITRE ATT&CK Mapping
+
+### T1098 - Account Manipulation
+
+**Tactic:**
+
+* Persistence
+* Privilege Escalation
+
+**Description:**
+
+Adversaries may manipulate account settings or permissions to maintain access to a compromised environment.
+
+**Lab Relevance:**
+
+A newly created user account was added to the local Administrators group, increasing its privileges and providing persistent administrative access.
+
+---
+
+## Commands Executed
+
+### Create Local User
+
+```cmd
+net user AdminTest Password123! /add
+```
+
+Purpose:
+
+* Create a new local Windows account named `AdminTest`.
+
+---
+
+### Add User to Administrators Group
+
+```cmd
+net localgroup Administrators AdminTest /add
+```
+
+Purpose:
+
+* Grant administrative privileges to the newly created account.
+
+---
+
+## Detection Workflow
+
+Windows Endpoint
+
+↓
+
+Windows Security Event Logs
+
+↓
+
+Wazuh Agent
+
+↓
+
+Wazuh Manager
+
+↓
+
+Wazuh Dashboard
+
+↓
+
+SOC Investigation
+
+---
+
+## Activity Observed
+
+### User Account Creation
+
+A new local user account was successfully created.
+
+Observed User:
+
+```text
+AdminTest
+```
+
+Security Significance:
+
+* Creation of unauthorized accounts may indicate persistence activity.
+* New accounts should always be reviewed during incident investigations.
+
+---
+
+### Administrative Group Membership Change
+
+The newly created account was added to the local Administrators group.
+
+Security Significance:
+
+* Grants elevated privileges.
+* Increases attacker control over the system.
+* Common post-compromise persistence technique.
+
+---
+
+## Investigation Findings
+
+### Event Analysis
+
+Wazuh successfully collected and displayed events related to:
+
+* User account creation
+* Local group membership modification
+* Administrative privilege assignment
+
+The activity was visible within the Wazuh dashboard and correlated with MITRE ATT&CK mappings.
+
+---
+
+## Evidence Collected
+
+### Figure 1 - Overview Event Logs
+
+Screenshot showing the event overview within the Wazuh Dashboard.
+
+---
+
+### Figure 2 - Detailed Log Entry
+
+Screenshot displaying detailed event information collected by Wazuh.
+
+---
+
+### Figure 3 - MITRE ATT&CK Mapping
+
+Screenshot showing the MITRE ATT&CK technique mapping associated with the detected activity.
+
+---
+
+## Security Impact
+
+If performed by an adversary, this activity could indicate:
+
+* Persistence establishment
+* Privilege assignment
+* Unauthorized account management
+* Preparation for future access
+
+SOC analysts should treat unexpected administrator account creation as a high-priority investigation event.
+
+---
+
+## Key Findings
+
+* User account creation activity was successfully detected.
+* Administrative group membership changes were recorded.
+* Wazuh successfully ingested and displayed relevant Windows security events.
+* MITRE ATT&CK mappings were associated with the activity.
+* Endpoint telemetry collection remains operational.
+
+---
+
+## Lessons Learned
+
+* User account creation is a valuable security indicator.
+* Administrator group membership changes should be closely monitored.
+* Persistence techniques often rely on legitimate Windows administrative functionality.
+* Wazuh provides visibility into account-management activities.
+* MITRE ATT&CK mappings help analysts understand attacker objectives.
+
+---
+
+## Skills Practiced
+
+* Windows Security Monitoring
+* Account Manipulation Detection
+* Privilege Assignment Analysis
+* Wazuh Event Investigation
+* MITRE ATT&CK Correlation
+* SOC Documentation
+
+---
+
+## Status
+
+**Lab Exercise:** Successful
+
+**Technique:** T1098 - Account Manipulation
+
+**Platform:** Windows 10 Pro
+
+**SIEM:** Wazuh
+
+**Result:** User account creation and administrator group modification activities were successfully detected, investigated, and documented.
