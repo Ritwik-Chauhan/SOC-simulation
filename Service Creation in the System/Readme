@@ -1,0 +1,170 @@
+Day 06 - Windows Service Creation Detection
+Objective
+
+Simulate the creation of a Windows service and investigate how Wazuh detects system changes associated with the activity.
+
+This exercise demonstrates how attackers can use Windows services to establish persistence and maintain access to a compromised system.
+
+Lab Environment
+Infrastructure
+Windows 10 Pro Endpoint
+Ubuntu 22.04 Wazuh Server
+Kali Linux VM
+VirtualBox Lab Environment
+Components
+Wazuh Manager
+Wazuh Indexer
+Wazuh Dashboard
+Wazuh Windows Agent
+Scenario
+
+Attackers frequently create Windows services after obtaining administrative privileges.
+
+Services can be configured to start automatically during system boot and execute code with elevated privileges.
+
+The purpose of this exercise was to simulate service creation and investigate how Wazuh detects the resulting system modifications.
+
+MITRE ATT&CK Mapping
+T1112 - Modify Registry
+
+Tactic
+
+Defense Evasion
+
+Description
+
+Adversaries may modify the Windows Registry to store configuration data, maintain persistence, or alter system behavior.
+
+Lab Relevance
+
+Creating a Windows service generated new registry entries under:
+
+HKLM\SYSTEM\CurrentControlSet\Services\TestService
+
+Wazuh detected the registry modification and mapped the activity to MITRE ATT&CK technique T1112.
+
+Activity Performed
+Service Creation
+
+The following command was executed from an elevated Command Prompt:
+
+sc create TestService binPath= "C:\Windows\System32\cmd.exe"
+
+Result:
+
+[SC] CreateService SUCCESS
+
+The service was successfully created and registered within Windows.
+
+Detection Workflow
+
+Windows Endpoint
+
+↓
+
+Windows Registry Modified
+
+↓
+
+Wazuh Agent
+
+↓
+
+Wazuh Manager
+
+↓
+
+Wazuh Dashboard
+
+↓
+
+SOC Investigation
+
+Observed Detection
+Alert Title
+Registry value entry added to system
+Detection Mode
+scheduled
+Registry Path
+HKLM\SYSTEM\CurrentControlSet\Services\TestService
+MITRE ATT&CK
+T1112 - Modify Registry
+Investigation Findings
+
+Wazuh successfully detected the registry modifications generated during service creation.
+
+The registry entry was associated with the newly created Windows service.
+
+Analysis confirmed that the detected registry path directly matched the service created during the exercise.
+
+Security Impact
+
+If performed by an attacker, this technique could be used to:
+
+Establish Persistence
+
+The service can survive system reboots.
+
+Execute Malicious Code
+
+A service can be configured to launch malware or attacker-controlled programs.
+
+Maintain Elevated Access
+
+Services frequently run with privileged permissions.
+
+Evade Casual Inspection
+
+Background services are often overlooked by users.
+
+Evidence Collected
+Figure 1 - Service Creation Command
+
+Screenshot showing execution of the service creation command.
+
+Figure 2 - Service Creation Success Message
+
+Screenshot showing successful service registration.
+
+Figure 3 - Wazuh Overview Logs
+
+Screenshot displaying detection within Wazuh.
+
+Figure 4 - Detailed Alert Information
+
+Screenshot showing registry path and alert details.
+
+Figure 5 - MITRE ATT&CK Mapping
+
+Screenshot displaying T1112 - Modify Registry mapping.
+
+Key Findings
+Windows service creation was successfully performed.
+Wazuh detected registry modifications related to the service.
+Registry path analysis confirmed linkage to the created service.
+MITRE ATT&CK technique T1112 was automatically mapped.
+Endpoint telemetry collection is functioning correctly.
+Lessons Learned
+Windows services are a common persistence mechanism.
+Service creation results in registry modifications.
+Registry monitoring can reveal attacker activity.
+Wazuh can detect indirect evidence of attacker actions through system changes.
+MITRE ATT&CK mappings help contextualize observed behavior.
+Skills Practiced
+Windows Service Analysis
+Registry Monitoring
+Wazuh Investigation
+MITRE ATT&CK Analysis
+Persistence Technique Identification
+SOC Documentation
+Status
+
+Lab Exercise: Successful
+
+Technique: T1112 - Modify Registry
+
+Platform: Windows 10 Pro
+
+SIEM: Wazuh
+
+Result: Service creation activity generated registry modifications that were successfully detected and investigated using Wazuh.
