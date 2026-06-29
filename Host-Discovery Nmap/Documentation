@@ -1,0 +1,144 @@
+ Host Discovery using Nmap (MITRE ATT&CK T1018)
+
+## Objective
+
+The objective of this lab was to understand how attackers perform host discovery on a network and how defenders can investigate this activity. A host discovery scan was performed from a Kali Linux machine against a Windows 10 virtual machine while monitoring the environment using Wazuh.
+
+---
+
+## Lab Environment
+
+| Component        | Description                         |
+| ---------------- | ----------------------------------- |
+| Hypervisor       | VirtualBox                          |
+| Attacker Machine | Kali Linux                          |
+| Victim Machine   | Windows 10                          |
+| SIEM             | Wazuh Server                        |
+| Monitoring Agent | Wazuh Agent installed on Windows 10 |
+
+---
+
+## Network Configuration
+
+| Machine      | IP Address          |
+| ------------ | ------------------- |
+| Kali Linux   | `<192.168.52.10x>`         |
+| Windows 10   | `<192.168.52.10x>`      |
+| Wazuh Server | `<192.168.52.106>` |
+
+---
+
+## Commands Executed
+
+### Windows 10
+
+Displayed the network configuration to identify the Windows IP address.
+
+```cmd
+ipconfig
+```
+
+Verified the Address Resolution Protocol (ARP) cache after communication with Kali.
+
+```cmd
+arp -a
+```
+
+---
+
+### Kali Linux
+
+Displayed the network interface configuration.
+
+```bash
+ip a
+```
+
+Performed host discovery using Nmap.
+
+```bash
+sudo nmap -sn <SUBNET>/24
+```
+sudo nmap -sn 192.168.56.0/24
+```
+
+---
+
+## Results
+
+* Kali successfully identified active hosts on the subnet.
+* The Windows machine responded to ICMP Echo Requests.
+* Running `arp -a` on Windows displayed the MAC address of the Kali machine, confirming Layer 2 communication.
+* No authentication attempts or exploitation activities were performed.
+* The activity was limited to host discovery.
+
+---
+
+## Wazuh Investigation
+
+The Wazuh dashboard was reviewed after the scan.
+
+### Observation
+
+No alerts related to the ICMP host discovery scan were generated.
+
+### Reason
+
+This behavior is expected in a default Wazuh deployment because:
+
+* ICMP echo requests do not generate Windows Security Events.
+* `arp -a` is a local command that only reads the ARP cache and does not produce security events.
+* Wazuh primarily monitors endpoint events such as authentication, process creation, services, registry modifications, and file integrity unless additional network monitoring or custom rules are configured.
+
+---
+
+## MITRE ATT&CK Mapping
+
+| Tactic    | Technique               | Technique ID |
+| --------- | ----------------------- | ------------ |
+| Discovery | Remote System Discovery | T1018        |
+
+---
+
+## SOC Analyst Investigation
+
+### Observed Activity
+
+* Source Host: Kali Linux
+* Destination Host: Windows 10
+* Activity: ICMP Host Discovery
+* Tools Used: Nmap (`-sn`)
+
+### Analysis
+
+Host discovery is the reconnaissance phase of an attack. It is commonly used by attackers to identify live systems before conducting further enumeration. However, host discovery alone does not confirm malicious intent, as system administrators may also perform similar scans for asset inventory or troubleshooting.
+
+At this stage, there was no evidence of:
+
+* Port scanning
+* Service enumeration
+* Login attempts
+* Privilege escalation
+* Malware execution
+
+Therefore, the activity should be classified as **suspicious but not malicious**. Continued monitoring is recommended to determine whether additional reconnaissance or exploitation follows.
+
+---
+
+---
+
+## Key Learning Outcomes
+
+* Learned how to identify the IP addresses of Windows and Kali virtual machines.
+* Performed host discovery using Nmap.
+* Understood how ARP is used to resolve MAC addresses after communication.
+* Verified host communication using the ARP cache.
+* Investigated why default Wazuh deployments may not generate alerts for ICMP host discovery.
+* Mapped reconnaissance activity to the MITRE ATT&CK framework (T1018).
+* Practiced documenting an investigation from a SOC analyst's perspective.
+
+---
+
+## Conclusion
+
+This lab demonstrated the initial reconnaissance phase of an attack by performing host discovery with Nmap. While the activity was successfully observed from the attacker’s perspective, no corresponding Wazuh alerts were generated because default endpoint monitoring does not typically detect ICMP-based host discovery. This highlights the importance of combining endpoint telemetry with network monitoring to improve visibility into reconnaissance activities.
